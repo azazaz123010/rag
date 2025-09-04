@@ -1,3 +1,4 @@
+/*
 :root{
   --bg:#f8fafc; --card:#ffffff; --ink:#0f172a; --muted:#64748b;
   --ring:#e2e8f0; --accent:#4f46e5; --accent-50:#eef2ff;
@@ -32,6 +33,7 @@ li:hover{background:#f8fafc}
 .empty{color:var(--muted);font-size:14px;margin-top:10px}
 
 /* Modal */
+/*
 .overlay{position:fixed;inset:0;background:rgba(15,23,42,.35);backdrop-filter:saturate(120%) blur(2px);z-index:40}
 .modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;z-index:50}
 .modal[hidden], .overlay[hidden]{display:none}
