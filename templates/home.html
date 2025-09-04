@@ -1,0 +1,26 @@
+<!-- templates/home.html -->
+{% extends "base.html" %}
+
+{% block title %}Welcome - Auth App{% endblock %}
+
+{% block content %}
+{% if session.user_id %}
+    <div class="welcome-card">
+        <h1>Welcome back!</h1>
+        <p>You are successfully logged in.</p>
+        <div class="btn-group">
+            <a href="{{ url_for('profile') }}" class="btn-secondary">View Profile</a>
+            <a href="{{ url_for('logout') }}" class="btn-secondary">Logout</a>
+        </div>
+    </div>
+{% else %}
+    <div class="welcome-card">
+        <h1>Welcome to AuthApp</h1>
+        <p>A secure authentication system built with Flask and Google App Engine.</p>
+        <div class="btn-group">
+            <a href="{{ url_for('login') }}" class="btn-secondary">Login</a>
+            <a href="{{ url_for('register') }}" class="btn-secondary">Register</a>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}
