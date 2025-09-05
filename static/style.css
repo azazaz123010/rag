@@ -10,7 +10,7 @@ body {
 
 /* ...existing code... */
 :root{
-  --bg:#f8fafc; --card:#ffffff; --ink:#0f172a; --muted:#64748b;
+  --bg:#f8fafc; --card:#ffffff; --ink:#0f172a; --muted:#000000;
   --ring:#e2e8f0; --accent:#4f46e5; --accent-50:#eef2ff;
 }
 *{box-sizing:border-box}
