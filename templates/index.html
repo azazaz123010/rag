@@ -3,48 +3,50 @@
 {% block title %}Universities Explorer{% endblock %}
 
 {% block content %}
-  <header style="margin-bottom: 2rem;">
-    <h1>Universities Explorer</h1>
-    <p class="subtitle">Click a card to expand. Use search to filter quickly. Click a school to see its summary + Q&As.</p>
-  </header>
+  <div style="max-width: none; width: 100vw; min-height: 80vh; padding: 0; margin: -2rem -2rem;">
+    <header style="margin: 2rem 2rem 2rem 2rem;">
+      <h1>Universities Explorer</h1>
+      <p class="subtitle">Click a card to expand. Use search to filter quickly. Click a school to see its summary + Q&As.</p>
+    </header>
 
-  <!-- Top 10 CS Universities -->
-  <section style="width: 100%; margin-bottom: 2rem;">
-    <div class="card" id="cs-card" style="background: none; box-shadow: none; padding: 0;">
-      <button class="card-header" aria-expanded="true" aria-controls="cs-panel">
-        <div class="left">
-          <span class="arrow open" id="cs-arrow" aria-hidden="true"></span>
-          <span class="title">Top 10 CS Universities</span>
-          <span class="count" id="cs-count">0</span>
+    <!-- Top 10 CS Universities -->
+    <section style="width: 100%; margin-bottom: 2rem; padding: 0 2rem;">
+      <div class="card" id="cs-card" style="max-width: none; width: 100%; background: none; box-shadow: none; padding: 0;">
+        <button class="card-header" aria-expanded="true" aria-controls="cs-panel">
+          <div class="left">
+            <span class="arrow open" id="cs-arrow" aria-hidden="true"></span>
+            <span class="title">Top 10 CS Universities</span>
+            <span class="count" id="cs-count">0</span>
+          </div>
+          <span class="muted">Hide</span>
+        </button>
+        <div class="panel show" id="cs-panel">
+          <div class="search"><input id="cs-search" placeholder="Search in this list..." /></div>
+          <ol id="cs-list"></ol>
+          <p class="empty" id="cs-empty" style="display:none">No matches. Try a different keyword.</p>
         </div>
-        <span class="muted">Hide</span>
-      </button>
-      <div class="panel show" id="cs-panel">
-        <div class="search"><input id="cs-search" placeholder="Search in this list..." /></div>
-        <ol id="cs-list"></ol>
-        <p class="empty" id="cs-empty" style="display:none">No matches. Try a different keyword.</p>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Top 30 National Universities -->
-  <section style="width: 100%;">
-    <div class="card" id="nat-card" style="background: none; box-shadow: none; padding: 0;">
-      <button class="card-header" aria-expanded="false" aria-controls="nat-panel">
-        <div class="left">
-          <span class="arrow" id="nat-arrow" aria-hidden="true"></span>
-          <span class="title">Top 30 National Universities</span>
-          <span class="count" id="nat-count">0</span>
+    <!-- Top 30 National Universities -->
+    <section style="width: 100%; padding: 0 2rem;">
+      <div class="card" id="nat-card" style="max-width: none; width: 100%; background: none; box-shadow: none; padding: 0;">
+        <button class="card-header" aria-expanded="false" aria-controls="nat-panel">
+          <div class="left">
+            <span class="arrow" id="nat-arrow" aria-hidden="true"></span>
+            <span class="title">Top 30 National Universities</span>
+            <span class="count" id="nat-count">0</span>
+          </div>
+          <span class="muted">Show</span>
+        </button>
+        <div class="panel" id="nat-panel">
+          <div class="search"><input id="nat-search" placeholder="Search in this list..." /></div>
+          <ol id="nat-list"></ol>
+          <p class="empty" id="nat-empty" style="display:none">No matches. Try a different keyword.</p>
         </div>
-        <span class="muted">Show</span>
-      </button>
-      <div class="panel" id="nat-panel">
-        <div class="search"><input id="nat-search" placeholder="Search in this list..." /></div>
-        <ol id="nat-list"></ol>
-        <p class="empty" id="nat-empty" style="display:none">No matches. Try a different keyword.</p>
       </div>
-    </div>
-  </section>
+    </section>
+  </div>
 
   <!-- Modal -->
   <div id="modal-overlay" class="overlay" hidden></div>
