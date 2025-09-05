@@ -7,6 +7,17 @@
   <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="/" class="logo">AuthApp</a>
+      <ul class="nav-links">
+        <li><a href="/profile">Profile</a></li>
+        <li><a href="/logout">Logout</a></li>
+        <li><a href="/login">Login</a></li>
+        <li><a href="/register">Register</a></li>
+      </ul>
+    </div>
+  </nav>
   <div class="container">
     <header>
       <h1>Universities Explorer</h1>
