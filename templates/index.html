@@ -3,14 +3,14 @@
 {% block title %}Universities Explorer{% endblock %}
 
 {% block content %}
-  <div class="container" style="background: none; box-shadow: none; padding: 0;">
-    <header>
-      <h1>Universities Explorer</h1>
-      <p class="subtitle">Click a card to expand. Use search to filter quickly. Click a school to see its summary + Q&As.</p>
-    </header>
+  <header style="margin-bottom: 2rem;">
+    <h1>Universities Explorer</h1>
+    <p class="subtitle">Click a card to expand. Use search to filter quickly. Click a school to see its summary + Q&As.</p>
+  </header>
 
-    <!-- Top 10 CS Universities -->
-    <section class="card" id="cs-card">
+  <!-- Top 10 CS Universities -->
+  <section style="width: 100%; margin-bottom: 2rem;">
+    <div class="card" id="cs-card" style="background: none; box-shadow: none; padding: 0;">
       <button class="card-header" aria-expanded="true" aria-controls="cs-panel">
         <div class="left">
           <span class="arrow open" id="cs-arrow" aria-hidden="true"></span>
@@ -24,10 +24,12 @@
         <ol id="cs-list"></ol>
         <p class="empty" id="cs-empty" style="display:none">No matches. Try a different keyword.</p>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- Top 30 National Universities -->
-    <section class="card" id="nat-card">
+  <!-- Top 30 National Universities -->
+  <section style="width: 100%;">
+    <div class="card" id="nat-card" style="background: none; box-shadow: none; padding: 0;">
       <button class="card-header" aria-expanded="false" aria-controls="nat-panel">
         <div class="left">
           <span class="arrow" id="nat-arrow" aria-hidden="true"></span>
@@ -41,8 +43,8 @@
         <ol id="nat-list"></ol>
         <p class="empty" id="nat-empty" style="display:none">No matches. Try a different keyword.</p>
       </div>
-    </section>
-  </div>
+    </div>
+  </section>
 
   <!-- Modal -->
   <div id="modal-overlay" class="overlay" hidden></div>
