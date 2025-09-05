@@ -10,8 +10,8 @@
         <p>You are successfully logged in.</p>
         <div class="btn-group">
             <a href="{{ url_for('profile') }}" class="btn-secondary">View Profile</a>
-            <a href="{{ url_for('logout') }}" class="btn-secondary">Logout</a>
             <a href="{{ url_for('index') }}" class="btn-secondary">Schools</a>
+            <a href="{{ url_for('logout') }}" class="btn-secondary">Logout</a>
         </div>
     </div>
 {% else %}
