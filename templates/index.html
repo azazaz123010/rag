@@ -1,12 +1,8 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <title>Universities Explorer</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block title %}Universities Explorer{% endblock %}
+
+{% block content %}
   <div class="container">
     <header>
       <h1>Universities Explorer</h1>
@@ -62,5 +58,4 @@
   </div>
 
   <script src="{{ url_for('static', filename='script.js') }}"></script>
-</body>
-</html>
+{% endblock %}
