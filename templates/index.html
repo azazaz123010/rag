@@ -1,75 +1,141 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Universities Explorer</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+  <!-- Your stylesheet -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+  <!-- Optional: page-level accent variables -->
+  <style>
+    :root {
+      --card: #ffffff;
+      --ring: rgba(0,0,0,.08);
+      --muted: #667085;
+    }
+    body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    header { max-width: 1100px; margin: 48px auto 16px; padding: 0 16px; color: #fff; }
+    main { max-width: 1100px; margin: 0 auto 120px; padding: 0 16px; }
+    .page-title { font-size: 28px; font-weight: 800; letter-spacing: .2px; }
+    .subtitle { opacity: .9; margin-top: 6px; }
+
+    /* Card shell */
+    .card { background: rgba(255,255,255,.9); border: 1px solid var(--ring);
+            border-radius: 16px; box-shadow: 0 12px 40px rgba(17,24,39,.16); }
+    .card-header { width: 100%; background: transparent; border: 0; padding: 16px;
+                   display: flex; justify-content: space-between; align-items: center;
+                   cursor: pointer; border-bottom: 1px solid rgba(0,0,0,.06); }
+    .card-header .left { display: flex; align-items: center; gap: 10px; }
+    .card-header .title { font-weight: 700; }
+    .card-header .count { margin-left: 8px; font-size: 12px; color: var(--muted); }
+    .panel { padding: 12px 16px 16px; }
+    .panel.show { display: block; }
+    .panel .search { margin: 6px 0 12px; }
+    .panel input { width: 100%; padding: 10px 12px; border: 1px solid rgba(0,0,0,.08);
+                   border-radius: 10px; outline: none; }
+    .empty { display: none; color: var(--muted); margin-top: 8px; }
+
+    /* List rows */
+    ol#cs-list { list-style: none; margin: 0; padding: 0; }
+    #cs-list li { display: flex; align-items: center; gap: 12px; padding: 10px 12px;
+                  border: 1px solid rgba(0,0,0,.06); border-radius: 10px;
+                  background: var(--card); transition: background .15s ease, box-shadow .15s ease;
+                  cursor: pointer; }
+    #cs-list li + li { margin-top: 8px; }
+    #cs-list li:hover { background: #f8fafc; box-shadow: 0 1px 2px rgba(0,0,0,.03); }
+    .rank { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center;
+            border: 1px solid rgba(0,0,0,.08); font-weight: 700; }
+    .name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .wikilink { font-size: 12px; color: #4f46e5; text-decoration: none; }
+    .wikilink:hover { text-decoration: underline; }
+
+    /* Overlay + Modal (grows with content; page scrolls) */
+    .overlay { position: fixed; inset: 0; background: rgba(17,24,39,.55); backdrop-filter: blur(2px);
+               z-index: 1999; }
+    .modal { position: absolute; left: 50%; transform: translateX(-50%); top: clamp(16px,6vh,72px);
+             width: min(920px, 95vw); background: var(--card); border: 1px solid var(--ring);
+             border-radius: 14px; box-shadow: 0 22px 60px rgba(17,24,39,.28);
+             display: flex; flex-direction: column; opacity: 0; visibility: hidden;
+             transition: opacity .18s ease, visibility .18s ease, transform .18s ease;
+             z-index: 2000; }
+    .modal.show { opacity: 1; visibility: visible; transform: translateX(-50%); }
+    .modal-header { position: sticky; top: 0; background: inherit; padding: 14px 18px;
+                    border-bottom: 1px solid rgba(0,0,0,.06); display: flex; align-items: center; gap: 10px; }
+    .modal-title { font-weight: 800; font-size: 18px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .close-btn { margin-left: auto; border: 0; background: transparent; font-size: 20px; padding: 6px 8px; border-radius: 8px; cursor: pointer; }
+    .close-btn:hover { background: rgba(0,0,0,.06); }
+    .modal-body { padding: 16px 18px; }
+    .summary { background: #f8fafc; border: 1px solid rgba(0,0,0,.06); border-radius: 10px; padding: 12px 14px; line-height: 1.55; }
+    .qa { margin-top: 14px; }
+    .qa h3 { margin: 14px 0 6px; font-size: 15px; }
+    .muted.small { color: var(--muted); font-size: 12px; }
+  </style>
 </head>
 <body>
-  <nav class="navbar">
-    <div class="nav-container">
-      <a href="/" class="logo">UniversitiesExplorer</a>
-      <ul class="nav-links">
-        <li><a href="/profile">Profile</a></li>
-        <li><a href="/logout">Logout</a></li>
-      </ul>
-    </div>
-  </nav>
-  <div class="container">
-    <header>
-      <h1>Universities Explorer</h1>
-      <p class="subtitle">Click a card to expand. Use search to filter quickly. Click a school to see its summary + Q&As.</p>
-    </header>
+  <header>
+    <div class="page-title">Universities Explorer</div>
+    <div class="subtitle">Click a row to open details. Search to filter.</div>
+  </header>
 
-    <!-- Top 10 CS Universities -->
+  <main>
+    <!-- Top 10 CS Universities card -->
     <section class="card" id="cs-card">
-      <button class="card-header" aria-expanded="true" aria-controls="cs-panel">
+      <button class="card-header" aria-expanded="true" aria-controls="cs-panel" type="button">
         <div class="left">
-          <span class="arrow open" id="cs-arrow" aria-hidden="true"></span>
           <span class="title">Top 10 CS Universities</span>
-          <span class="count" id="cs-count">0</span>
+          <span class="count" id="cs-count">{{ top10|length if top10 is defined else '' }}</span>
         </div>
         <span class="muted">Hide</span>
       </button>
+
       <div class="panel show" id="cs-panel">
-        <div class="search"><input id="cs-search" placeholder="Search in this list..." /></div>
-        <ol id="cs-list"></ol>
-        <p class="empty" id="cs-empty" style="display:none">No matches. Try a different keyword.</p>
-      </div>
-    </section>
-
-    <!-- Top 30 National Universities -->
-    <section class="card" id="nat-card">
-      <button class="card-header" aria-expanded="false" aria-controls="nat-panel">
-        <div class="left">
-          <span class="arrow" id="nat-arrow" aria-hidden="true"></span>
-          <span class="title">Top 30 National Universities</span>
-          <span class="count" id="nat-count">0</span>
+        <div class="search">
+          <input id="cs-search" placeholder="Search in this list..." />
         </div>
-        <span class="muted">Show</span>
-      </button>
-      <div class="panel" id="nat-panel">
-        <div class="search"><input id="nat-search" placeholder="Search in this list..." /></div>
-        <ol id="nat-list"></ol>
-        <p class="empty" id="nat-empty" style="display:none">No matches. Try a different keyword.</p>
+
+        <!-- Render server-side if provided, else JS will fill -->
+        <ol id="cs-list">
+          {% if top10 is defined %}
+            {% for name in top10 %}
+              <li data-school="{{ name }}">
+                <span class="rank">{{ loop.index }}</span>
+                <div>
+                  <div class="name">{{ name }}</div>
+                  <a class="wikilink" href="https://en.wikipedia.org/wiki/{{ name|urlencode }}" target="_blank" rel="noreferrer">View on Wikipedia</a>
+                </div>
+              </li>
+            {% endfor %}
+          {% endif %}
+        </ol>
+
+        <p class="empty" id="cs-empty">No matches. Try a different keyword.</p>
       </div>
     </section>
-  </div>
+  </main>
 
-  <!-- Modal -->
-  <div id="modal-overlay" class="overlay" hidden></div>
-  <div id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" hidden>
+  <!-- Overlay + Modal -->
+  <div class="overlay" id="modal-overlay" hidden></div>
+  <div class="modal" id="modal" hidden>
     <div class="modal-header">
-      <h2 id="modal-title" class="modal-title">Loading…</h2>
-      <button id="modal-close" class="close-btn" aria-label="Close">✕</button>
+      <h2 class="modal-title" id="modal-title">Title</h2>
+      <button class="close-btn" id="modal-close" aria-label="Close">×</button>
     </div>
-    <div id="modal-body" class="modal-body">
-      <div class="spinner"></div>
-      <p class="muted small">Fetching summary & Q&As…</p>
-    </div>
+    <div class="modal-body" id="modal-body"></div>
   </div>
 
+  <!-- (A) If using Flask: bootstrap the RAG map for instant render -->
+  <script id="bootstrap-cs10" type="application/json">
+    {% if rag_map is defined %}{{ rag_map | tojson }}{% endif %}
+  </script>
+
+  <!-- (B) If not using Flask, set the JSON URL here (JS also has a default) -->
+  <script>
+    window.CS10_JSON_URL = "{{ url_for('static', filename='cs10_results.json') if top10 is defined else '/static/cs10_results.json' }}";
+  </script>
+
+  <!-- Your script -->
   <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
