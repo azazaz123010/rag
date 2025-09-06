@@ -506,120 +506,52 @@ li:hover{background:#f8fafc}
   z-index: 1999;
 }
 
+/* Modal grows with content; the PAGE will scroll */
 .modal {
-  position: fixed;
-  top: 50%;
+  position: absolute;              /* was fixed */
   left: 50%;
-  /* animate in */
-  transform: translate(-50%, -50%) scale(0.98);
-  transition: transform 0.18s ease, opacity 0.18s ease, visibility 0.18s ease;
-  opacity: 0;
-  visibility: hidden;
-
-  /* panel look */
+  transform: translateX(-50%);     /* center horizontally only */
+  top: clamp(16px, 6vh, 72px);
   width: min(920px, 95vw);
-  max-height: min(85vh, 900px);
+  max-width: 95vw;
   background: var(--card, #fff);
   border: 1px solid var(--ring, rgba(0,0,0,.08));
   border-radius: 14px;
-  box-shadow: 0 22px 60px rgba(17, 24, 39, 0.28);
+  box-shadow: 0 22px 60px rgba(17,24,39,.28);
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  z-index: 2000;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .18s ease, visibility .18s ease, transform .18s ease;
 }
 
-/* show state added by JS */
 .modal.show {
   opacity: 1;
   visibility: visible;
-  transform: translate(-50%, -50%) scale(1);
+  transform: translateX(-50%);     /* remove the scaleAnimation */
 }
 
+/* Header sticks to the top of the modal block (optional) */
 .modal-header {
   position: sticky;
   top: 0;
   background: inherit;
   padding: 14px 18px;
-  border-bottom: 1px solid var(--ring, rgba(0,0,0,.06));
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  border-bottom: 1px solid rgba(0,0,0,.06);
+  z-index: 1;
 }
 
-.modal-title {
-  font-size: 18px;
-  line-height: 1.25;
-  font-weight: 700;
-  margin: 0;
-  /* avoid super long titles pushing the X button */
-}
-
-.close-btn {
-  margin-left: auto;
-  border: none;
-  background: transparent;
-  font-size: 18px;
-  line-height: 1;
-  padding: 8px;
-  border-radius: 8px;
-  cursor: pointer;
-}
-.close-btn:hover { background: rgba(0,0,0,.06); }
-
+/* Let the body expand; NO internal scrollbar */
 .modal-body {
   padding: 16px 18px;
-  overflow: auto;                /* body scrolls, header sticks */
+  overflow: visible;               /* was auto */
 }
 
-/* nicer summary block */
-.modal-body .summary {
-  background: #f8fafc;
-  border: 1px solid rgba(0,0,0,.06);
-  border-radius: 10px;
-  padding: 12px 14px;
-  line-height: 1.55;
+/* Keep the dim overlay fixed to the viewport */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(17,24,39,.55);
+  backdrop-filter: blur(2px);
+  z-index: 1999;
 }
-
-/* Q&A spacing if you render them in lists */
-.modal-body .qa {
-  margin-top: 14px;
-}
-.modal-body .qa h3 {
-  margin: 14px 0 8px;
-  font-size: 15px;
-}
-
-/* --- List items feel like rows --- */
-ul.unis { list-style: none; padding: 0; margin: 0; }
-.unis li {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  padding: 10px 12px;
-  border-radius: 10px;
-  border: 1px solid rgba(0,0,0,.06);
-  background: var(--card, #fff);
-  transition: background .15s ease, transform .05s ease, box-shadow .15s ease;
-  cursor: pointer;
-}
-.unis li + li { margin-top: 8px; }
-.unis li:hover {
-  background: #f8fafc;
-  box-shadow: 0 1px 2px rgba(0,0,0,.03);
-}
-.unis .name {
-  flex: 1;
-  min-width: 0;                  /* enable ellipsis */
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.unis .meta {
-  color: var(--muted, #667085);
-  font-size: 12px;
-}
-
-/* keep the “View on Wikipedia” link neat */
-.unis .meta a { text-decoration: none; }
-.unis .meta a:hover { text-decoration: underline; }

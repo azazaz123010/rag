@@ -302,14 +302,14 @@ function openModal(title) {
   overlayEl.hidden = false;
   modalEl.hidden = false;
   modalEl.classList.add("show");     // NEW: reveal with CSS transition
-  document.body.style.overflow = "hidden"; // NEW: stop background scroll
+  //document.body.style.overflow = "hidden"; // NEW: stop background scroll
 }
 
 function closeModal() {
   modalEl.classList.remove("show");  // NEW
   overlayEl.hidden = true;
   modalEl.hidden = true;
-  document.body.style.overflow = ""; // NEW
+  //document.body.style.overflow = ""; // NEW
 }
 overlayEl.addEventListener("click", closeModal);
 modalCloseEl.addEventListener("click", closeModal);
