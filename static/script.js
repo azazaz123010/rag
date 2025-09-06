@@ -155,4 +155,97 @@ function parseAnswerBlob(blob) {
   const pending = new Map();
   for (const b of after){
     if (b.type==="q"){
-      const idx = qas.p
+      const idx = qas.push({q:b.text, a:""})-1;
+      if (b.n!=null) pending.set(b.n, idx); else pending.set(`_u_${idx}`, idx);
+    } else if (b.type==="a"){
+      if (b.n!=null && pending.has(b.n)){
+        qas[pending.get(b.n)].a = b.text; pending.delete(b.n);
+      } else {
+        for (let i=qas.length-1;i>=0;i--){ if (!qas[i].a){ qas[i].a=b.text; break; } }
+      }
+    }
+  }
+
+  summary = summary.replace(/\*\*/g,"");
+  qas.forEach(x => { x.q=(x.q||"").replace(/\*\*/g,""); x.a=(x.a||"").replace(/\*\*/g,""); });
+  return { summary, qas };
+}
+
+/* ---------- Utilities ---------- */
+const wikiUrl = (name) => `https://en.wikipedia.org/wiki/${encodeURIComponent(name)}`;
+
+function renderList(targetOl, items, ragMap) {
+  targetOl.innerHTML = "";
+  items.forEach((name, i) => {
+    const li = document.createElement("li");
+    li.dataset.school = name;
+    li.innerHTML = `
+      <span class="rank">${i + 1}</span>
+      <div>
+        <div class="name">${name}</div>
+        <a class="wikilink" href="${wikiUrl(name)}" target="_blank" rel="noreferrer">View on Wikipedia</a>
+      </div>`;
+    // Clicking row -> open modal; if no rag for this school, show friendly message
+    li.addEventListener("click", () => openModalAndRender(name, ragMap));
+    li.querySelector(".wikilink").addEventListener("click", (e) => e.stopPropagation());
+    targetOl.appendChild(li);
+  });
+}
+
+function attachSearch(inputEl, listEl, emptyEl, source, ragMap, countEl) {
+  function apply() {
+    const q = (inputEl.value || "").trim().toLowerCase();
+    const filtered = q ? source.filter(s => s.toLowerCase().includes(q)) : source.slice();
+    renderList(listEl, filtered, ragMap);
+    if (countEl) countEl.textContent = String(filtered.length);
+    emptyEl.style.display = filtered.length ? "none" : "block";
+  }
+  inputEl.addEventListener("input", apply);
+  apply();
+}
+
+function openModalAndRender(name, ragMap) {
+  openModal(name);
+  const blob = ragMap ? ragMap[name] : null;
+  if (!blob) {
+    modalBodyEl.innerHTML = `<p class="muted">No summary/Q&As available for “${name}”.</p>`;
+    return;
+  }
+  const { summary, qas } = parseAnswerBlob(blob);
+  modalBodyEl.innerHTML =
+    `<section class="summary">
+       <strong>Summary:</strong>
+       <p>${summary.replace(/\n/g,"<br>")}</p>
+     </section>` +
+    qas.map(({q,a}) => `
+      <div class="qa">
+        <h3>Q: ${q}</h3>
+        <p>${a}</p>
+      </div>`).join("");
+}
+
+/* ---------- Boot ---------- */
+(async function init() {
+  try {
+    // Load CS data (RAG + top10), render CS card
+    const { top10, ragData } = await loadCsData();
+
+    // If server didn't prerender the CS list, do it now
+    if (!csListEl.children.length) renderList(csListEl, top10, ragData);
+    csCountEl.textContent = String(top10.length);
+    attachSearch(csInputEl, csListEl, csEmptyEl, top10, ragData, csCountEl);
+
+    // Render National card from legacy list
+    natCountEl.textContent = String(natTopUnis.length);
+    renderList(natListEl, natTopUnis, ragData); // try to reuse CS rag when available
+    attachSearch(natInputEl, natListEl, natEmptyEl, natTopUnis, ragData, natCountEl);
+
+    // Wire expand/collapse arrows (legacy)
+    wireCard("cs-card", "cs-arrow", "cs-panel");
+    wireCard("nat-card", "nat-arrow", "nat-panel");
+  } catch (err) {
+    console.error(err);
+    csEmptyEl.textContent = "Failed to load data.";
+    csEmptyEl.style.display = "block";
+  }
+})();
