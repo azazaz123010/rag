@@ -301,8 +301,10 @@ function openModal(title) {
   modalBodyEl.innerHTML = `<div class="spinner"></div><p class="muted small">Loading RAG content…</p>`;
   overlayEl.hidden = false;
   modalEl.hidden = false;
+  modalEl.classList.add("show");   // <-- add this
 }
 function closeModal() {
+  modalEl.classList.remove("show"); // <-- add this
   overlayEl.hidden = true;
   modalEl.hidden = true;
 }
