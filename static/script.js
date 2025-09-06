@@ -301,12 +301,15 @@ function openModal(title) {
   modalBodyEl.innerHTML = `<div class="spinner"></div><p class="muted small">Loading RAG content…</p>`;
   overlayEl.hidden = false;
   modalEl.hidden = false;
-  modalEl.classList.add("show");   // <-- add this
+  modalEl.classList.add("show");     // NEW: reveal with CSS transition
+  document.body.style.overflow = "hidden"; // NEW: stop background scroll
 }
+
 function closeModal() {
-  modalEl.classList.remove("show"); // <-- add this
+  modalEl.classList.remove("show");  // NEW
   overlayEl.hidden = true;
   modalEl.hidden = true;
+  document.body.style.overflow = ""; // NEW
 }
 overlayEl.addEventListener("click", closeModal);
 modalCloseEl.addEventListener("click", closeModal);
