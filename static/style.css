@@ -553,9 +553,6 @@ li:hover{background:#f8fafc}
   font-weight: 700;
   margin: 0;
   /* avoid super long titles pushing the X button */
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .close-btn {
