@@ -27,6 +27,9 @@ function openModal(title) {
   overlayEl.hidden = false;
   modalEl.hidden = false;
   modalEl.classList.add("show");
+
+  // NEW: ensure it comes into view even if user clicked at the bottom
+  centerModalNextPaint();
 }
 function closeModal() {
   modalEl.classList.remove("show");
@@ -209,8 +212,10 @@ function openModalAndRender(name, ragMap) {
   const blob = ragMap ? ragMap[name] : null;
   if (!blob) {
     modalBodyEl.innerHTML = `<p class="muted">No summary/Q&As available for “${name}”.</p>`;
+    centerModalNextPaint();   // NEW: recenter after content change
     return;
   }
+
   const { summary, qas } = parseAnswerBlob(blob);
   modalBodyEl.innerHTML =
     `<section class="summary">
@@ -222,6 +227,24 @@ function openModalAndRender(name, ragMap) {
         <h3>Q: ${q}</h3>
         <p>${a}</p>
       </div>`).join("");
+
+  centerModalNextPaint();     // NEW: recenter after filling the modal
+}
+
+function centerModalInViewport() {
+  // Compute a scroll position that centers the modal vertically
+  const rect = modalEl.getBoundingClientRect();
+  const modalTop = rect.top + window.scrollY;
+  const modalHeight = rect.height || modalEl.offsetHeight || 0;
+  const targetTop = Math.max(0, modalTop - (window.innerHeight - modalHeight) / 2);
+  window.scrollTo({ top: targetTop, behavior: "smooth" });
+}
+
+// Call after DOM paints (height is known)
+function centerModalNextPaint() {
+  requestAnimationFrame(() => {
+    requestAnimationFrame(centerModalInViewport);
+  });
 }
 
 /* ---------- Boot ---------- */
