@@ -1,9 +1,23 @@
 /* =========================
    Universities Explorer JS
-   (CS Top-10 + Nat Top-30 via JSON)
+   (merged legacy + new)
    ========================= */
 
-/* ---------- DOM hooks ---------- */
+/* ---------- Legacy constants preserved (Nat Top Universities) ---------- */
+const natTopUnis = [
+  "Princeton University","Massachusetts Institute of Technology","Harvard University",
+  "Stanford University","Yale University","California Institute of Technology",
+  "Duke University","Johns Hopkins University","Northwestern University",
+  "University of Pennsylvania","Cornell University","University of Chicago",
+  "Brown University","Columbia University","Dartmouth College",
+  "University of California, Los Angeles","University of California, Berkeley",
+  "University of Notre Dame","Rice University","Vanderbilt University",
+  "Carnegie Mellon University","University of Michigan",
+  "University of California, San Diego","New York University",
+  "University of Florida","University of Texas at Austin"
+];
+
+/* ---------- DOM hooks (both cards) ---------- */
 const csListEl   = document.getElementById("cs-list");
 const csInputEl  = document.getElementById("cs-search");
 const csCountEl  = document.getElementById("cs-count");
@@ -14,7 +28,7 @@ const natInputEl = document.getElementById("nat-search");
 const natCountEl = document.getElementById("nat-count");
 const natEmptyEl = document.getElementById("nat-empty");
 
-/* ---------- Modal (existing behavior preserved) ---------- */
+/* ---------- Modal controls (legacy ids kept) ---------- */
 const overlayEl    = document.getElementById("modal-overlay");
 const modalEl      = document.getElementById("modal");
 const modalTitleEl = document.getElementById("modal-title");
@@ -39,7 +53,7 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "Escape" && !modalEl.hidden) closeModal();
 });
 
-/* ---------- Card toggle (existing) ---------- */
+/* ---------- Card toggle (legacy) ---------- */
 function wireCard(cardId, arrowId, panelId) {
   const card = document.getElementById(cardId);
   const headerBtn = card.querySelector(".card-header");
@@ -55,19 +69,22 @@ function wireCard(cardId, arrowId, panelId) {
   });
 }
 
-/* ---------- Loaders ---------- */
-// CS Top-10 from Jinja bootstrap or /static/cs10_results.json
+/* ---------- Data loading for CS Top-10 (Jinja bootstrap -> JSON fetch) ---------- */
 async function loadCsData() {
+  // Bootstrapped JSON map from Jinja: { "School": "blob", ... }
   const tag = document.getElementById("bootstrap-cs10");
   if (tag && tag.textContent && tag.textContent.trim().startsWith("{")) {
     const ragData = JSON.parse(tag.textContent);
     const top10 = Object.keys(ragData).slice(0, 10);
     return { top10, ragData };
   }
+
+  // Fallback to static JSON array: [{school, answer}, ...]
   const url = window.CS10_JSON_URL || "/static/cs10_results.json";
   const res = await fetch(url, { cache: "no-cache" });
   if (!res.ok) throw new Error(`Failed to load ${url}: ${res.status}`);
   const rows = await res.json();
+
   const ragData = {};
   const seen = new Set();
   const top10 = [];
@@ -75,35 +92,15 @@ async function loadCsData() {
     const name = (row.school || "").trim();
     if (!name) continue;
     ragData[name] = row.answer || "";
-    if (!seen.has(name) && top10.length < 10) { seen.add(name); top10.push(name); }
+    if (!seen.has(name) && top10.length < 10) {
+      seen.add(name); top10.push(name);
+    }
   }
   return { top10, ragData };
 }
 
-// NEW: National Top-30 from Jinja bootstrap or /static/top30_results.json
-async function loadNatData() {
-  const tag = document.getElementById("bootstrap-nat30");
-  if (tag && tag.textContent && tag.textContent.trim().startsWith("{")) {
-    const ragData = JSON.parse(tag.textContent);         // { "School": "<Summary/Q&A blob>", ... }
-    const list = Object.keys(ragData);                   // whatever length (26 in your set)
-    return { list, ragData };
-  }
-  const url = window.NAT30_JSON_URL || "/static/top30_results.json";
-  const res = await fetch(url, { cache: "no-cache" });
-  if (!res.ok) throw new Error(`Failed to load ${url}: ${res.status}`);
-  const rows = await res.json();                         // [{school, answer}, ...]
-  const ragData = {};
-  const list = [];
-  for (const row of rows) {
-    const name = (row.school || "").trim();
-    if (!name) continue;
-    ragData[name] = row.answer || "";
-    list.push(name);
-  }
-  return { list, ragData };
-}
-
-/* ---------- Parser (unchanged, robust to **Summary:** / Q1: / etc.) ---------- */
+/* ---------- Normalization + parsing (new) ---------- */
+// strip **bold**, bullets, trim
 function normLine(line) {
   let s = String(line || "").replace(/\r/g, "").trim();
   s = s.replace(/^\*{1,3}|\*{1,3}$/g, "");
@@ -129,6 +126,7 @@ function parseAnswerBlob(blob) {
     else blocks.push({type:"text", text:l});
   }
 
+  // gather summary
   let summary = "";
   const after = [];
   let inSum = false;
@@ -152,6 +150,7 @@ function parseAnswerBlob(blob) {
     summary = (lead.join("\n\n").trim()) || "No summary available.";
   }
 
+  // pair Q/A
   const qas = [];
   const pending = new Map();
   for (const b of after){
@@ -172,7 +171,7 @@ function parseAnswerBlob(blob) {
   return { summary, qas };
 }
 
-/* ---------- Rendering + search ---------- */
+/* ---------- Utilities ---------- */
 const wikiUrl = (name) => `https://en.wikipedia.org/wiki/${encodeURIComponent(name)}`;
 
 function renderList(targetOl, items, ragMap) {
@@ -186,6 +185,7 @@ function renderList(targetOl, items, ragMap) {
         <div class="name">${name}</div>
         <a class="wikilink" href="${wikiUrl(name)}" target="_blank" rel="noreferrer">View on Wikipedia</a>
       </div>`;
+    // Clicking row -> open modal; if no rag for this school, show friendly message
     li.addEventListener("click", () => openModalAndRender(name, ragMap));
     li.querySelector(".wikilink").addEventListener("click", (e) => e.stopPropagation());
     targetOl.appendChild(li);
@@ -227,25 +227,20 @@ function openModalAndRender(name, ragMap) {
 /* ---------- Boot ---------- */
 (async function init() {
   try {
-    const [{ top10, ragData: csRag }, { list: natList, ragData: natRag }] = await Promise.all([
-      loadCsData(),
-      loadNatData()
-    ]);
+    // Load CS data (RAG + top10), render CS card
+    const { top10, ragData } = await loadCsData();
 
-    // Merge both RAG maps so the modal can resolve from either source
-    const mergedRag = Object.assign({}, csRag, natRag);
-
-    // CS card (use server prerender if present)
-    if (!csListEl.children.length) renderList(csListEl, top10, mergedRag);
+    // If server didn't prerender the CS list, do it now
+    if (!csListEl.children.length) renderList(csListEl, top10, ragData);
     csCountEl.textContent = String(top10.length);
-    attachSearch(csInputEl, csListEl, csEmptyEl, top10, mergedRag, csCountEl);
+    attachSearch(csInputEl, csListEl, csEmptyEl, top10, ragData, csCountEl);
 
-    // National card (JSON-driven now)
-    natCountEl.textContent = String(natList.length);
-    renderList(natListEl, natList, mergedRag);
-    attachSearch(natInputEl, natListEl, natEmptyEl, natList, mergedRag, natCountEl);
+    // Render National card from legacy list
+    natCountEl.textContent = String(natTopUnis.length);
+    renderList(natListEl, natTopUnis, ragData); // try to reuse CS rag when available
+    attachSearch(natInputEl, natListEl, natEmptyEl, natTopUnis, ragData, natCountEl);
 
-    // Expand/collapse arrows (unchanged)
+    // Wire expand/collapse arrows (legacy)
     wireCard("cs-card", "cs-arrow", "cs-panel");
     wireCard("nat-card", "nat-arrow", "nat-panel");
   } catch (err) {

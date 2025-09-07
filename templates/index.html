@@ -5,6 +5,7 @@
   <title>Universities Explorer</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
 </head>
 <body>
   <!-- Old navbar kept -->
@@ -53,7 +54,7 @@
       </div>
     </section>
 
-    <!-- Card 2: Top 30 National Universities (now JSON-driven) -->
+    <!-- Card 2: Top 30 National Universities (always client-rendered from the legacy list) -->
     <section class="card" id="nat-card">
       <button class="card-header" aria-expanded="false" aria-controls="nat-panel" type="button">
         <div class="left">
@@ -84,20 +85,14 @@
     </div>
   </div>
 
-  <!-- Jinja bootstrap for CS Top-10 RAG map (optional; JS auto-detects) -->
+  <!-- Jinja bootstrap for RAG map (optional; JS auto-detects) -->
   <script id="bootstrap-cs10" type="application/json">
     {% if rag_map is defined %}{{ rag_map | tojson }}{% endif %}
   </script>
 
-  <!-- OPTIONAL: Jinja bootstrap for National Top-30 (if you render server-side) -->
-  <script id="bootstrap-nat30" type="application/json">
-    {% if nat_rag_map is defined %}{{ nat_rag_map | tojson }}{% endif %}
-  </script>
-
-  <!-- Static URLs for JSON fallbacks (used if bootstrap tags are empty) -->
+  <!-- If not using Flask locally, the JS falls back to this URL -->
   <script>
     window.CS10_JSON_URL = "{{ url_for('static', filename='cs10_results.json') if top10 is defined else '/static/cs10_results.json' }}";
-    window.NAT30_JSON_URL = "{{ url_for('static', filename='top30_results.json') if nat_rag_map is defined else '/static/top30_results.json' }}";
   </script>
 
   <script src="{{ url_for('static', filename='script.js') }}"></script>
